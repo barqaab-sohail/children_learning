@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'color_drawing_game.dart';
+import 'mouse_adventure.dart';
+
 // Change these two values to make the balloon game shorter or longer.
 const int balloonMissesToEndGame = 10;
 const int balloonHitsToEndGame = 20;
@@ -357,7 +360,17 @@ class HomeScreen extends StatelessWidget {
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => MousePracticeScreen(profile: profile),
+                      builder: (_) => MouseAdventureScreen(
+                        learnerName: profile.name,
+                        clickGarden: (_) =>
+                            MousePracticeScreen(profile: profile),
+                        balloonPark: (_) =>
+                            BalloonSpeedGame(learnerName: profile.name),
+                        starSpace: (_) =>
+                            StarTargetGame(learnerName: profile.name),
+                        coloringStudio: (_) =>
+                            ColorDrawingGame(learnerName: profile.name),
+                      ),
                     ),
                   ),
                 ),
@@ -560,58 +573,61 @@ class _LearnersScreenState extends State<LearnersScreen> {
     body: _profiles == null
         ? const Center(child: CircularProgressIndicator())
         : ListView.separated(
-          padding: const EdgeInsets.all(24),
-          itemCount: _profiles!.length,
-          separatorBuilder: (_, _) => const SizedBox(height: 10),
-          itemBuilder: (context, index) {
-            final profile = _profiles![index];
-            final selected = profile.id == _activeId;
-            return Card(
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                leading: CircleAvatar(
-                  child: Text(profile.name.characters.first.toUpperCase()),
-                ),
-                title: Text(
-                  profile.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
+            padding: const EdgeInsets.all(24),
+            itemCount: _profiles!.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final profile = _profiles![index];
+              final selected = profile.id == _activeId;
+              return Card(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
                   ),
-                ),
-                subtitle: Text(
-                  selected
-                      ? 'Currently learning'
-                      : 'Tap to continue as ${profile.name}',
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (selected)
-                      const Icon(Icons.check_circle, color: Color(0xFF00A884)),
-                    IconButton(
-                      key: Key('edit-learner-${profile.id}'),
-                      tooltip: 'Edit ${profile.name}',
-                      onPressed: () => _edit(profile),
-                      icon: const Icon(Icons.edit_outlined),
+                  leading: CircleAvatar(
+                    child: Text(profile.name.characters.first.toUpperCase()),
+                  ),
+                  title: Text(
+                    profile.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                     ),
-                    IconButton(
-                      key: Key('delete-learner-${profile.id}'),
-                      tooltip: 'Delete ${profile.name}',
-                      color: Colors.redAccent,
-                      onPressed: () => _delete(profile),
-                      icon: const Icon(Icons.delete_outline_rounded),
-                    ),
-                  ],
+                  ),
+                  subtitle: Text(
+                    selected
+                        ? 'Currently learning'
+                        : 'Tap to continue as ${profile.name}',
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (selected)
+                        const Icon(
+                          Icons.check_circle,
+                          color: Color(0xFF00A884),
+                        ),
+                      IconButton(
+                        key: Key('edit-learner-${profile.id}'),
+                        tooltip: 'Edit ${profile.name}',
+                        onPressed: () => _edit(profile),
+                        icon: const Icon(Icons.edit_outlined),
+                      ),
+                      IconButton(
+                        key: Key('delete-learner-${profile.id}'),
+                        tooltip: 'Delete ${profile.name}',
+                        color: Colors.redAccent,
+                        onPressed: () => _delete(profile),
+                        icon: const Icon(Icons.delete_outline_rounded),
+                      ),
+                    ],
+                  ),
+                  onTap: () => _select(profile),
                 ),
-                onTap: () => _select(profile),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          ),
   );
 }
 
@@ -928,34 +944,6 @@ class _MousePracticeScreenState extends State<MousePracticeScreen> {
                           onPressed: _removePicture,
                           icon: const Icon(Icons.hide_image_outlined),
                         ),
-                      const SizedBox(width: 12),
-                      FilledButton.icon(
-                        key: const Key('open-balloon-game'),
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BalloonSpeedGame(
-                              learnerName: widget.profile.name,
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(Icons.sports_esports_rounded),
-                        label: const Text('Balloon Speed Game'),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton.icon(
-                        key: const Key('open-target-game'),
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => StarTargetGame(
-                              learnerName: widget.profile.name,
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(Icons.center_focus_strong_rounded),
-                        label: const Text('Star Target Challenge'),
-                      ),
                     ],
                   ),
                 ),
@@ -1366,7 +1354,9 @@ class _BalloonSpeedGameState extends State<BalloonSpeedGame> {
                     ),
                   ),
                   Text(
-                    _speed <= 2 ? 'Easy' : (_speed <= 4 ? 'Quick' : 'Super fast!'),
+                    _speed <= 2
+                        ? 'Easy'
+                        : (_speed <= 4 ? 'Quick' : 'Super fast!'),
                     style: const TextStyle(color: Color(0xFF625B78)),
                   ),
                   _GoalStepper(
@@ -1407,25 +1397,34 @@ class _BalloonSpeedGameState extends State<BalloonSpeedGame> {
                           const Positioned(
                             left: 24,
                             top: 20,
-                            child: Icon(Icons.cloud, size: 90, color: Colors.white70),
+                            child: Icon(
+                              Icons.cloud,
+                              size: 90,
+                              color: Colors.white70,
+                            ),
                           ),
                           const Positioned(
                             right: 50,
                             top: 90,
-                            child: Icon(Icons.cloud, size: 120, color: Colors.white54),
+                            child: Icon(
+                              Icons.cloud,
+                              size: 120,
+                              color: Colors.white54,
+                            ),
                           ),
                           for (final balloon in _balloons)
                             Positioned(
                               key: ValueKey(balloon.id),
-                              left: balloon.x * (constraints.maxWidth - balloon.size),
+                              left:
+                                  balloon.x *
+                                  (constraints.maxWidth - balloon.size),
                               top: balloon.y * constraints.maxHeight,
                               child: _BalloonWidget(
                                 balloon: balloon,
                                 onTap: () => _pop(balloon),
                               ),
                             ),
-                          if (!_playing)
-                            Center(child: _buildGameCard()),
+                          if (!_playing) Center(child: _buildGameCard()),
                         ],
                       ),
                     ),
@@ -1460,16 +1459,16 @@ class _BalloonSpeedGameState extends State<BalloonSpeedGame> {
               const Text('🎈', style: TextStyle(fontSize: 64)),
             const SizedBox(height: 8),
             Text(
-              _finished
-                  ? (_won ? 'YOU WIN!' : 'GAME OVER')
-                  : 'Ready to pop?',
+              _finished ? (_won ? 'YOU WIN!' : 'GAME OVER') : 'Ready to pop?',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: _finished ? 34 : 28,
                 fontWeight: FontWeight.w900,
                 color: !_finished
                     ? null
-                    : (_won ? const Color(0xFF00875F) : const Color(0xFFD9364F)),
+                    : (_won
+                          ? const Color(0xFF00875F)
+                          : const Color(0xFFD9364F)),
               ),
             ),
             const SizedBox(height: 10),
@@ -1486,11 +1485,19 @@ class _BalloonSpeedGameState extends State<BalloonSpeedGame> {
             FilledButton.icon(
               key: const Key('start-balloon-game'),
               onPressed: _startGame,
-              icon: Icon(_finished ? Icons.replay_rounded : Icons.play_arrow_rounded),
+              icon: Icon(
+                _finished ? Icons.replay_rounded : Icons.play_arrow_rounded,
+              ),
               label: Text(_finished ? 'Play Again' : 'Start Game'),
               style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-                textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 16,
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
           ],
@@ -1540,7 +1547,12 @@ class _BalloonPainter extends CustomPainter {
     final oval = Rect.fromLTWH(2, 1, size.width - 4, balloonHeight);
     canvas.drawOval(oval, Paint()..color = color);
     canvas.drawOval(
-      Rect.fromLTWH(size.width * .2, size.height * .1, size.width * .18, size.height * .2),
+      Rect.fromLTWH(
+        size.width * .2,
+        size.height * .1,
+        size.width * .18,
+        size.height * .2,
+      ),
       Paint()..color = Colors.white.withValues(alpha: .48),
     );
     final knot = Path()
@@ -1559,12 +1571,20 @@ class _BalloonPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _BalloonPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(covariant _BalloonPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class _GoalStepper extends StatelessWidget {
-  const _GoalStepper({required this.label, required this.value, required this.enabled,
-    required this.min, required this.max, required this.step, required this.onChanged});
+  const _GoalStepper({
+    required this.label,
+    required this.value,
+    required this.enabled,
+    required this.min,
+    required this.max,
+    required this.step,
+    required this.onChanged,
+  });
   final String label;
   final int value, min, max, step;
   final bool enabled;
@@ -1573,18 +1593,40 @@ class _GoalStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-    decoration: BoxDecoration(color: Colors.white.withValues(alpha: .85), borderRadius: BorderRadius.circular(24)),
-    child: Row(mainAxisSize: MainAxisSize.min, children: [
-      Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-      IconButton(visualDensity: VisualDensity.compact, tooltip: 'Decrease $label',
-        onPressed: enabled && value > min ? () => onChanged(value - step < min ? min : value - step) : null,
-        icon: const Icon(Icons.remove_circle_outline_rounded)),
-      SizedBox(width: 28, child: Text('$value', textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900))),
-      IconButton(visualDensity: VisualDensity.compact, tooltip: 'Increase $label',
-        onPressed: enabled && value < max ? () => onChanged(value + step > max ? max : value + step) : null,
-        icon: const Icon(Icons.add_circle_outline_rounded)),
-    ]),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: .85),
+      borderRadius: BorderRadius.circular(24),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          tooltip: 'Decrease $label',
+          onPressed: enabled && value > min
+              ? () => onChanged(value - step < min ? min : value - step)
+              : null,
+          icon: const Icon(Icons.remove_circle_outline_rounded),
+        ),
+        SizedBox(
+          width: 28,
+          child: Text(
+            '$value',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900),
+          ),
+        ),
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          tooltip: 'Increase $label',
+          onPressed: enabled && value < max
+              ? () => onChanged(value + step > max ? max : value + step)
+              : null,
+          icon: const Icon(Icons.add_circle_outline_rounded),
+        ),
+      ],
+    ),
   );
 }
 
@@ -1598,17 +1640,31 @@ class StarTargetGame extends StatefulWidget {
 class _StarTargetGameState extends State<StarTargetGame> {
   final _random = Random();
   Timer? _timer;
-  int _speed = 3, _hitGoal = 20, _missGoal = 10, _hits = 0, _misses = 0, _targetNumber = 0;
+  int _speed = 3,
+      _hitGoal = 20,
+      _missGoal = 10,
+      _hits = 0,
+      _misses = 0,
+      _targetNumber = 0;
   double _x = 0, _y = 0, _remaining = 1;
   bool _playing = false, _finished = false, _won = false;
   double get _secondsPerTarget => 2.25 - (_speed * .27);
 
   @override
-  void dispose() { _timer?.cancel(); super.dispose(); }
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   void _start() {
     _timer?.cancel();
-    setState(() { _hits = 0; _misses = 0; _finished = false; _won = false; _playing = true; });
+    setState(() {
+      _hits = 0;
+      _misses = 0;
+      _finished = false;
+      _won = false;
+      _playing = true;
+    });
     _next();
     _timer = Timer.periodic(const Duration(milliseconds: 40), (_) {
       if (!_playing || !mounted) return;
@@ -1635,46 +1691,139 @@ class _StarTargetGameState extends State<StarTargetGame> {
 
   void _end(bool won) {
     _timer?.cancel();
-    setState(() { _playing = false; _finished = true; _won = won; });
+    setState(() {
+      _playing = false;
+      _finished = true;
+      _won = won;
+    });
   }
 
   @override
   Widget build(BuildContext context) => Scaffold(
     body: DecoratedBox(
-      decoration: const BoxDecoration(gradient: LinearGradient(
-        begin: Alignment.topLeft, end: Alignment.bottomRight,
-        colors: [Color(0xFF17153B), Color(0xFF433D8B), Color(0xFF2E236C)])),
-      child: SafeArea(child: Column(children: [
-        Padding(padding: const EdgeInsets.fromLTRB(18, 12, 18, 8), child: Row(children: [
-          IconButton.filledTonal(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.arrow_back_rounded)),
-          const SizedBox(width: 10),
-          const Text('Star Target Challenge', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900)),
-          const Spacer(),
-          _StatusPill(icon: Icons.bolt_rounded, text: 'Hits  $_hits / $_hitGoal', color: const Color(0xFF00C897)),
-          const SizedBox(width: 8),
-          _StatusPill(icon: Icons.close_rounded, text: 'Misses  $_misses / $_missGoal', color: const Color(0xFFFF5D8F)),
-        ])),
-        Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, spacing: 10, children: [
-          const Text('Speed', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
-          SizedBox(width: 230, child: Slider(value: _speed.toDouble(), min: 1, max: 5, divisions: 4, label: '$_speed',
-            onChanged: _playing ? null : (v) => setState(() => _speed = v.round()))),
-          _GoalStepper(label: 'Hit goal', value: _hitGoal, enabled: !_playing, min: 5, max: 50, step: 5,
-            onChanged: (v) => setState(() => _hitGoal = v)),
-          _GoalStepper(label: 'Miss limit', value: _missGoal, enabled: !_playing, min: 1, max: 25, step: 1,
-            onChanged: (v) => setState(() => _missGoal = v)),
-        ]),
-        Expanded(child: Padding(padding: const EdgeInsets.all(18), child: Container(
-          decoration: BoxDecoration(color: const Color(0xFF10102A), borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white24, width: 2), boxShadow: const [BoxShadow(color: Colors.black38, blurRadius: 24)]),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(fit: StackFit.expand, children: [
-            const CustomPaint(painter: _StarFieldPainter()),
-            if (_playing) AnimatedAlign(duration: const Duration(milliseconds: 130), alignment: Alignment(_x, _y),
-              child: _SpeedTarget(key: ValueKey(_targetNumber), remaining: _remaining.clamp(0.0, 1.0).toDouble(), onTap: _hit)),
-            if (!_playing) Center(child: _gameCard()),
-          ]),
-        ))),
-      ])),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF17153B), Color(0xFF433D8B), Color(0xFF2E236C)],
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 8),
+              child: Row(
+                children: [
+                  IconButton.filledTonal(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back_rounded),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Star Target Challenge',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const Spacer(),
+                  _StatusPill(
+                    icon: Icons.bolt_rounded,
+                    text: 'Hits  $_hits / $_hitGoal',
+                    color: const Color(0xFF00C897),
+                  ),
+                  const SizedBox(width: 8),
+                  _StatusPill(
+                    icon: Icons.close_rounded,
+                    text: 'Misses  $_misses / $_missGoal',
+                    color: const Color(0xFFFF5D8F),
+                  ),
+                ],
+              ),
+            ),
+            Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 10,
+              children: [
+                const Text(
+                  'Speed',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                SizedBox(
+                  width: 230,
+                  child: Slider(
+                    value: _speed.toDouble(),
+                    min: 1,
+                    max: 5,
+                    divisions: 4,
+                    label: '$_speed',
+                    onChanged: _playing
+                        ? null
+                        : (v) => setState(() => _speed = v.round()),
+                  ),
+                ),
+                _GoalStepper(
+                  label: 'Hit goal',
+                  value: _hitGoal,
+                  enabled: !_playing,
+                  min: 5,
+                  max: 50,
+                  step: 5,
+                  onChanged: (v) => setState(() => _hitGoal = v),
+                ),
+                _GoalStepper(
+                  label: 'Miss limit',
+                  value: _missGoal,
+                  enabled: !_playing,
+                  min: 1,
+                  max: 25,
+                  step: 1,
+                  onChanged: (v) => setState(() => _missGoal = v),
+                ),
+              ],
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10102A),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: Colors.white24, width: 2),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black38, blurRadius: 24),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      const CustomPaint(painter: _StarFieldPainter()),
+                      if (_playing)
+                        AnimatedAlign(
+                          duration: const Duration(milliseconds: 130),
+                          alignment: Alignment(_x, _y),
+                          child: _SpeedTarget(
+                            key: ValueKey(_targetNumber),
+                            remaining: _remaining.clamp(0.0, 1.0).toDouble(),
+                            onTap: _hit,
+                          ),
+                        ),
+                      if (!_playing) Center(child: _gameCard()),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     ),
   );
 
@@ -1687,27 +1836,59 @@ class _StarTargetGameState extends State<StarTargetGame> {
         ? (_won ? const Color(0xAA00C897) : const Color(0xAAFF5D8F))
         : Colors.black54,
     child: ConstrainedBox(
-    constraints: const BoxConstraints(maxWidth: 430),
-    child: Padding(padding: const EdgeInsets.all(30), child: Column(mainAxisSize: MainAxisSize.min, children: [
-      if (_finished)
-        _GameResultVisual(won: _won)
-      else
-        const Icon(Icons.stars_rounded, size: 68, color: Color(0xFFFFC857)),
-      Text(!_finished ? 'How fast can you click?' : (_won ? 'YOU WIN!' : 'GAME OVER'),
-        textAlign: TextAlign.center, style: TextStyle(
-          fontSize: _finished ? 34 : 27,
-          color: !_finished ? null : (_won ? const Color(0xFF00875F) : const Color(0xFFD9364F)),
-          fontWeight: FontWeight.w900)),
-      const SizedBox(height: 10),
-      Text(!_finished ? 'Click each star before its ring runs out. The star jumps after every click.'
-        : (_won ? 'Lightning fast, ${widget.learnerName}! $_hits targets hit.' : 'Nice try, ${widget.learnerName}! $_hits targets hit.'),
-        textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: Color(0xFF625B78))),
-      const SizedBox(height: 22),
-      FilledButton.icon(key: const Key('start-target-game'), onPressed: _start,
-        icon: Icon(_finished ? Icons.replay_rounded : Icons.play_arrow_rounded),
-        label: Text(_finished ? 'Play Again' : 'Start Challenge')),
-    ])),
-  ));
+      constraints: const BoxConstraints(maxWidth: 430),
+      child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_finished)
+              _GameResultVisual(won: _won)
+            else
+              const Icon(
+                Icons.stars_rounded,
+                size: 68,
+                color: Color(0xFFFFC857),
+              ),
+            Text(
+              !_finished
+                  ? 'How fast can you click?'
+                  : (_won ? 'YOU WIN!' : 'GAME OVER'),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: _finished ? 34 : 27,
+                color: !_finished
+                    ? null
+                    : (_won
+                          ? const Color(0xFF00875F)
+                          : const Color(0xFFD9364F)),
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              !_finished
+                  ? 'Click each star before its ring runs out. The star jumps after every click.'
+                  : (_won
+                        ? 'Lightning fast, ${widget.learnerName}! $_hits targets hit.'
+                        : 'Nice try, ${widget.learnerName}! $_hits targets hit.'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Color(0xFF625B78)),
+            ),
+            const SizedBox(height: 22),
+            FilledButton.icon(
+              key: const Key('start-target-game'),
+              onPressed: _start,
+              icon: Icon(
+                _finished ? Icons.replay_rounded : Icons.play_arrow_rounded,
+              ),
+              label: Text(_finished ? 'Play Again' : 'Start Challenge'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _GameResultVisual extends StatelessWidget {
@@ -1728,28 +1909,48 @@ class _GameResultVisual extends StatelessWidget {
             const Positioned(
               left: 4,
               top: 12,
-              child: Icon(Icons.auto_awesome, color: Color(0xFFFFB800), size: 35),
+              child: Icon(
+                Icons.auto_awesome,
+                color: Color(0xFFFFB800),
+                size: 35,
+              ),
             ),
             const Positioned(
               right: 5,
               top: 28,
-              child: Icon(Icons.star_rounded, color: Color(0xFFFF8A00), size: 32),
+              child: Icon(
+                Icons.star_rounded,
+                color: Color(0xFFFF8A00),
+                size: 32,
+              ),
             ),
             const Positioned(
               right: 18,
               bottom: 4,
-              child: Icon(Icons.celebration_rounded, color: Color(0xFF6C5CE7), size: 30),
+              child: Icon(
+                Icons.celebration_rounded,
+                color: Color(0xFF6C5CE7),
+                size: 30,
+              ),
             ),
           ] else ...[
             const Positioned(
               left: 7,
               top: 18,
-              child: Icon(Icons.close_rounded, color: Color(0xFFFF8A9A), size: 38),
+              child: Icon(
+                Icons.close_rounded,
+                color: Color(0xFFFF8A9A),
+                size: 38,
+              ),
             ),
             const Positioned(
               right: 8,
               bottom: 13,
-              child: Icon(Icons.close_rounded, color: Color(0xFFFF8A9A), size: 32),
+              child: Icon(
+                Icons.close_rounded,
+                color: Color(0xFFFF8A9A),
+                size: 32,
+              ),
             ),
           ],
           Container(
@@ -1760,7 +1961,11 @@ class _GameResultVisual extends StatelessWidget {
               color: color,
               border: Border.all(color: Colors.white, width: 7),
               boxShadow: [
-                BoxShadow(color: color.withValues(alpha: .42), blurRadius: 22, spreadRadius: 5),
+                BoxShadow(
+                  color: color.withValues(alpha: .42),
+                  blurRadius: 22,
+                  spreadRadius: 5,
+                ),
               ],
             ),
             child: Icon(
@@ -1798,16 +2003,51 @@ class _SpeedTarget extends StatelessWidget {
   final double remaining;
   final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => MouseRegion(cursor: SystemMouseCursors.click, child: GestureDetector(
-    onTap: onTap, child: SizedBox(width: 112, height: 112, child: Stack(alignment: Alignment.center, children: [
-      SizedBox(width: 108, height: 108, child: CircularProgressIndicator(value: remaining, strokeWidth: 8,
-        color: remaining < .3 ? const Color(0xFFFF5D8F) : const Color(0xFF52E5E7), backgroundColor: Colors.white12)),
-      Container(width: 82, height: 82, decoration: const BoxDecoration(shape: BoxShape.circle,
-        gradient: RadialGradient(colors: [Color(0xFFFFF1A8), Color(0xFFFFA62B)]),
-        boxShadow: [BoxShadow(color: Color(0xAAFFC857), blurRadius: 24)]),
-        child: const Icon(Icons.star_rounded, size: 57, color: Colors.white)),
-    ])),
-  ));
+  Widget build(BuildContext context) => MouseRegion(
+    cursor: SystemMouseCursors.click,
+    child: GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: 112,
+        height: 112,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 108,
+              height: 108,
+              child: CircularProgressIndicator(
+                value: remaining,
+                strokeWidth: 8,
+                color: remaining < .3
+                    ? const Color(0xFFFF5D8F)
+                    : const Color(0xFF52E5E7),
+                backgroundColor: Colors.white12,
+              ),
+            ),
+            Container(
+              width: 82,
+              height: 82,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [Color(0xFFFFF1A8), Color(0xFFFFA62B)],
+                ),
+                boxShadow: [
+                  BoxShadow(color: Color(0xAAFFC857), blurRadius: 24),
+                ],
+              ),
+              child: const Icon(
+                Icons.star_rounded,
+                size: 57,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
 }
 
 class _StarFieldPainter extends CustomPainter {
@@ -1817,10 +2057,17 @@ class _StarFieldPainter extends CustomPainter {
     final random = Random(42);
     final paint = Paint()..color = Colors.white.withValues(alpha: .5);
     for (var i = 0; i < 70; i++) {
-      canvas.drawCircle(Offset(random.nextDouble() * size.width, random.nextDouble() * size.height),
-        .7 + random.nextDouble() * 1.8, paint);
+      canvas.drawCircle(
+        Offset(
+          random.nextDouble() * size.width,
+          random.nextDouble() * size.height,
+        ),
+        .7 + random.nextDouble() * 1.8,
+        paint,
+      );
     }
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

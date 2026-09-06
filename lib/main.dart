@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'color_drawing_game.dart';
+import 'keyboard_learning.dart';
 import 'mouse_adventure.dart';
 
 // Change these two values to make the balloon game shorter or longer.
@@ -374,11 +375,19 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const _ModuleCard(
-                  icon: Icons.lock_outline,
+                _ModuleCard(
+                  key: const Key('keyboard-learning-module'),
+                  icon: Icons.keyboard_rounded,
                   color: Color(0xFFFFA94D),
-                  title: 'More activities',
-                  subtitle: 'New learning games are coming soon',
+                  title: 'Keyboard Learning',
+                  subtitle: 'Find letters, type words and collect stars',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          KeyboardLearningScreen(learnerName: profile.name),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -633,6 +642,7 @@ class _LearnersScreenState extends State<LearnersScreen> {
 
 class _ModuleCard extends StatelessWidget {
   const _ModuleCard({
+    super.key,
     required this.icon,
     required this.color,
     required this.title,

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'before_after_game.dart';
+
 typedef GameBuilder = Widget Function(BuildContext);
 
 class MouseAdventureScreen extends StatefulWidget {
@@ -251,6 +253,20 @@ class _HubState extends State<MouseAdventureScreen> {
             large: large,
             urdu: urdu,
             onWin: () => award('safari', 3),
+          ),
+        ),
+      ),
+      _Card(
+        key: const Key('adventure-before-after'),
+        Icons.compare_arrows_rounded,
+        const Color(0xFFFF7A45),
+        'Before & After Trail',
+        'Learn left, before and after',
+        'Learning game',
+        () => open(
+          BeforeAfterTrailGame(
+            learnerName: widget.learnerName,
+            onWin: () => award('before_after', 4),
           ),
         ),
       ),

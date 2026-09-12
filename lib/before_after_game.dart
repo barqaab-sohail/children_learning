@@ -76,7 +76,7 @@ class _BeforeAfterTrailGameState extends State<BeforeAfterTrailGame> {
   void _makeRow() {
     final pool = [...(_animalsMode ? _animals : _shapes)]..shuffle(_random);
     _row = pool.take(3).toList();
-    _askBefore = _score.isEven;
+    _askBefore = _random.nextBool();
     _waiting = false;
     _feedback = '';
   }
